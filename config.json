@@ -1,0 +1,13 @@
+{
+  "DOC": false,
+  "AUTO_PLAYLIST": "PL0ywFOIKePQZD2w38uDjH6LGNyI0wy1Vo",
+  "CLEF_API": "NOPE",
+  "TOUCHES": [ {
+  "SPECIALE": "shift",
+  "LANCER": "a",
+  "SKIP": "s",
+  "PAUSE": "o",
+  "QUITTER": "q"
+  }
+  ]
+}
