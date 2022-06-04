@@ -3,6 +3,9 @@
 # Description
 Un patch pour lire des playlist Youtube de façon réellement aléatoire
 
+# Important
+Si vous utilisez une version non compilée, dans [environnement python]\site-packages\selenium\webdriver\common\service.py ajoutez "+0x08000000" après "self.creationflags" ligne 76 pour vous débarasser de la console (https://stackoverflow.com/questions/57984953/how-to-hide-geckodriver-console-window).
+
 # Utilisation
 Flemme de faire une bonne doc donc je vais être conçis: Tout se contrôle depuis le fichier config.json et avec des raccourcis clavier.
 1) DOC: Booléenne en fonction de si vous voulez que le programme vous ouvre cette doc à côté ou pas
@@ -20,7 +23,6 @@ Flemme de faire une bonne doc donc je vais être conçis: Tout se contrôle depu
 2) Marche pas en arrière plan
 3) La fonction de préparation rame sa mère même quand on a déjà les données
 4) J'ai claqué mon quotat d'API
-5) Geckodriver ouvre une console inutile
-6) Fermer avec la croix ferme pas tout
-7) Pause pas testée
-8) Interagir directement avec le navigateur après lancement peut tout casser
+5) Fermer avec la croix ferme pas tout
+6) Pause pas testée
+7) Interagir directement avec le navigateur après lancement peut tout casser
