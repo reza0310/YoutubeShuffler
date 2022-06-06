@@ -6,8 +6,12 @@ import json
 import time
 import googleapiclient.discovery
 from urllib.parse import parse_qs, urlparse
+from pyvirtualdisplay import Display
+import pywin
+
 
 class Overtimer:
+
     def __init__(self, duration, callback):
         self.duration = duration
         self.callback = callback
@@ -29,12 +33,16 @@ class Overtimer:
     def cancel(self):
         self.timer.cancel()
 
+
 class Shuffler:
+
     def __init__(self):
         self.load()
 
         # Initialisation du navigateur
-        self.driver = webdriver.Firefox()
+        options = webdriver.FirefoxOptions()
+        options.add_argument("--headless")
+        self.driver = webdriver.Firefox(options=options)
         if self.CONFIG["DOC"]:
             self.driver.get("https://github.com/reza0310/YoutubeShuffler/blob/main/README.md#utilisation")
             self.driver.execute_script("window.open('');")
@@ -48,6 +56,7 @@ class Shuffler:
         # Automatisation
         if self.AUTO_PLAYLIST != None:
             self.driver.get("https://www.youtube.com/playlist?list=" + self.AUTO_PLAYLIST)
+            self.preparer()
 
         self.loop()
 
@@ -56,8 +65,8 @@ class Shuffler:
         keyboard.add_hotkey(self.TOUCHE_SPECIALE + "+" + self.TOUCHE_QUITTER, self.quitter)
         keyboard.add_hotkey(self.TOUCHE_SPECIALE + "+" + self.TOUCHE_LANCER, self.preparer)
         keyboard.add_hotkey(self.TOUCHE_SPECIALE + "+" + self.TOUCHE_SKIP, self.skip)
-        keyboard.add_hotkey(self.TOUCHE_SPECIALE + "+" + self.TOUCHE_PAUSE, self.pause)
-
+        keyboard.add_hotkey(self.TOUCHE_SPECIALE + "+" + self.TOUCHE_PAUSE, self.pauser)
+        keyboard.add_hotkey(self.TOUCHE_SPECIALE + "+" + self.TOUCHE_CACHER, self.cacher)
 
     def loop(self):
         # Bloquer la fermeture du script (Merci SPEEDY)
@@ -66,9 +75,8 @@ class Shuffler:
                 continue
             elif self.go:
                 self.go = False
-                self.timer = Overtimer(self.lancer() + 7, self.rego)  # Le +7 c'est pour la pub
+                self.timer = Overtimer(self.lancer() + 8, self.rego)  # Le +7 c'est pour la pub
                 self.timer.start()
-
 
     def load(self):
         # Chargement des configs
@@ -78,11 +86,36 @@ class Shuffler:
         self.TOUCHE_LANCER = self.CONFIG["TOUCHES"][0]["LANCER"]
         self.TOUCHE_QUITTER = self.CONFIG["TOUCHES"][0]["QUITTER"]
         self.TOUCHE_PAUSE = self.CONFIG["TOUCHES"][0]["PAUSE"]
+        self.TOUCHE_CACHER = self.CONFIG["TOUCHES"][0]["CACHER"]
         self.AUTO_PLAYLIST = self.CONFIG["AUTO_PLAYLIST"]
         self.QUITTER = True
         self.go = False
         self.pause = False
+        self.cache = False
         self.playlist_items = {}
+
+    def lancer(self):
+        choix = random.choice(list(self.playlist_items.keys()))
+        self.driver.get("https://www.youtube.com/watch?v=" + choix)
+        try:
+            self.driver.find_element_by_css_selector(".ytp-large-play-button").click()
+            tmp = threading.Timer(7, self.skip_pub)
+            tmp.start()
+            print(f"On joue {self.driver.title} ({self.driver.current_url})")
+        except:
+            print("Vidéo supprimée, nécessitant d'être connecté, interdite aux mineurs, fenêtre en arrière plan ou autre couilleS")
+            self.skip()
+        return self.playlist_items[choix]["FIN"]
+
+    def rego(self):
+        self.go = True
+
+    def skip_pub(self):
+        try:
+            self.driver.find_element_by_css_selector(".ytp-ad-skip-button-container").click()
+            print("Pub passée")
+        except:
+            print("Pas de pub!")
 
     # Définition des fonctions de manipulation du script
     def quitter(self):
@@ -115,17 +148,17 @@ class Shuffler:
             # https://github.com/CoreyMSchafer/code_snippets/blob/master/Python/YouTube-API/02-Playlist-Duration/playlist.py
             for i in range(len(response["items"])):
                 id = response['items'][i]['contentDetails']['videoId']
-                try:
-                    vid_request = youtube.videos().list(
-                        part="contentDetails",
-                        id=id
-                    )
-                    durees = self.formater_durees(vid_request.execute()['items'][0]['contentDetails']['duration'])
-                    if id not in self.playlist_items.keys():
+                if id not in self.playlist_items.keys():
+                    try:
+                        vid_request = youtube.videos().list(
+                            part="contentDetails",
+                            id=id
+                        )
+                        durees = self.formater_durees(vid_request.execute()['items'][0]['contentDetails']['duration'])
                         self.playlist_items[id] = {"DEBUT": 0, "FIN": durees}
                         print("NOUVEAU")
-                except:
-                    print("Vidéo supprimée")
+                    except:
+                        print("Vidéo supprimée")
                 # Afficher une barre sur mon site web
                 print(k, "/", total)
                 k += 1
@@ -136,12 +169,14 @@ class Shuffler:
         self.go = True
 
     def skip(self):
+        print("Commande skip reçue")
         self.timer.cancel()
         self.go = False
         self.timer = Overtimer(self.lancer() + 7, self.rego)  # Le +7 c'est pour la pub
         self.timer.start()
 
-    def pause(self):
+    def pauser(self):
+        print("Commande pause reçue")
         if self.pause:
             print("Reprise")
             self.timer.go()
@@ -152,20 +187,17 @@ class Shuffler:
             self.pause = True
         self.driver.find_element_by_css_selector(".video-stream").click()
 
+    def cacher(self):
+        if self.cache:
+            self.cachette.stop()
+            print(pywin.EnumWindows())
+            self.cache = False
+        else:
+            self.cachette.start()
+            print(pywin.EnumWindows())
+            self.cache = True
 
     # Fonctions utiles
-    def lancer(self):
-        choix = random.choice(list(self.playlist_items.keys()))
-        self.driver.get("https://www.youtube.com/watch?v=" + choix)
-        try:
-            self.driver.find_element_by_css_selector(".ytp-large-play-button").click()
-        except:
-            self.skip()  # Vidéo supprimée, nécessitant d'être connecté, interdite aux mineurs, fenêtre en arrière plan ou autre couille
-        return self.playlist_items[choix]["FIN"]
-
-    def rego(self):
-        self.go = True
-
     @staticmethod
     def formater_durees(texte):
         contient_minutes = "M" in texte
