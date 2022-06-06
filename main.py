@@ -103,7 +103,7 @@ class Shuffler:
             tmp.start()
             print(f"On joue {self.driver.title} ({self.driver.current_url})")
         except:
-            print("Vidéo supprimée, nécessitant d'être connecté, interdite aux mineurs, fenêtre en arrière plan ou autre couilleS")
+            print("Vidéo supprimée, nécessitant d'être connecté, interdite aux mineurs ou autre couille")
             self.skip()
         return self.playlist_items[choix]["FIN"]
 
