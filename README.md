@@ -21,3 +21,4 @@ Flemme de faire une bonne doc donc je vais être conçis: Tout se contrôle depu
 # Problèmes
 1) Fiabilité
 2) Choisir la playlist plus simplement qu'en modifiant du JSON
+3) Les hotkeys de retirent au bout d'un certain temps
