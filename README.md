@@ -19,10 +19,5 @@ Flemme de faire une bonne doc donc je vais être conçis: Tout se contrôle depu
    - QUITTER: La touche à appuyer pour tout quitter proprement
 
 # Problèmes
-1) L'affichage dans la console est problématique
-2) Marche pas en arrière plan
-3) La fonction de préparation rame sa mère même quand on a déjà les données
-4) J'ai claqué mon quotat d'API
-5) Fermer avec la croix ferme pas tout
-6) Pause pas testée
-7) Interagir directement avec le navigateur après lancement peut tout casser
+1) Fiabilité
+2) Choisir la playlist plus simplement qu'en modifiant du JSON
